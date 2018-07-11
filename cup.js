@@ -1,73 +1,95 @@
-const express = require('express'),
-const bodyParser = require('body-parser');
-const cup = express.Router()
+var express = require('express');
+var cup = express.Router();
 
 var uuid = require('uuid-v4');
 
-const deliveredteam = []
-const deliveredmatch = []
+var deliveredteams = []
+var deliveredmatches = []
 
 
 cup.get('/', function (req, res) {
 
-    res.json(deliveredteam + deliveredmatch)
+    res.json(deliveredteams + deliveredmatches)
 
 })
 
-cup.post('/team', function (req, res) {
+cup.post('/teams', function (req, res) {
 
-    const newteam = req.body
-    newteam.teamID = uuid()
-    deliveredcup.push(newteam)
+    var name = req.body.name
+    var is_still_in = req.body.is_still_in
+    var newteam = {
+
+        id: uuid(),
+        name: name,
+        is_still_in: is_still_in,
+        matches: []
+    }
+
+    deliveredteams.push(newteam)
     res.json(newteam)
 })
 
-cup.get('/team:teamID', function (req, res) {
+cup.get('/teams/:teamsID', function (req, res) {
 
-    const teamID = req.params.teamID
-    const i = deliveredcup.findIndex(item => {return item.teamID === teamID})
+    const teamsID = req.params.teamsID
+    const i = deliveredteams.findIndex(item => {return item.teamsID === teamsID})
     if (i==-1) res.sendStatus(404)
     else {
         res.status=200
-        res.json(deliveredcup[i])
+        res.json(deliveredteams[i])
     }
 })
 
-cup.put('/team:teamID', function (req, res) {
+cup.put('/teams/:teamsID', function (req, res) {
 
-    const teamID = req.params.teamID
-    const i = deliveredcup.findIndex(item => {return item.teamID === teamID})
+    const teamsID = req.params.teamsID
+    const i = deliveredteams.findIndex(item => {return item.teamsID === teamsID})
     deliveredcup[i] = req.body
-    deliveredcup[i].teamID = teamID
-    res.json(deliveredcup[i])
+    deliveredcup[i].teamsID = teamsID
+    res.json(deliveredteams[i])
 })
 
 cup.post('/match', function (req, res) {
 
-    const newmatch = req.body
-    newmatch.teamID = uuid()
-    deliveredcup.push(newmatch)
+    const team = req.body.team
+    const opponent = req.body.opponent
+    const outcome = req.body.outcome
+    var newmatch = {
+        team: team,
+        opponent: opponent,
+        outcome: outcome
+    }
+    deliveredmatches.push(newmatch)
+    const i = deliveredteams.findIndex(item => {return item.teamsID === teamsID})
+    deliveredteams[i].matches.push(newmatch)
+    const m = deliveredteams.findIndex(item => {return item.name === team})
+    deliveredteams[m].matches.push(deliveredmatches[i])
     res.json(newmatch)
 })
 
-cup.get('/match:matchID', function (req, res) {
+cup.get('/match/:team/:opponent', function (req, res) {
 
-    const matchID = req.params.matchID
-    const i = deliveredcup.findIndex(item => {return item.matchID === matchID})
+    const team = req.params.team
+    const opponent = req.params.opponent
+    const i = deliveredmatches.findIndex(item => {return item.team === team && item.opponent === opponent})
     if (i==-1) res.sendStatus(404)
     else {
         res.status=200
-        res.json(deliveredcup[i])
+        res.json(deliveredmatches[i])
     }
 })
 
-cup.put('/match:matchID', function (req, res) {
+cup.put('/match/:team/:opponent', function (req, res) {
 
-    const matchID = req.params.teamID
-    const i = deliveredcup.findIndex(item => {return item.matchID === matchID})
-    deliveredcup[i] = req.body
-    deliveredcup[i].matchID = matchID
-    res.json(deliveredcup[i])
+    const team = req.params.team
+    const opponent = req.params.opponent
+    const i = deliveredmatches.findIndex(item => {return item.team === team && item.opponent === opponent})
+    deliveredmathces[i] = req.body
+    deliveredmathces[i].matchID = matchID
+    const m = deliveredteams.findIndex(item => {return item.name === team})
+    const n = deliveredteams[m].matches.findIndex(item => {return item.team === team && item.opponent === opponent})
+    deliveredteams[m].matches[n] = deliveredmatches[i]
+    res.json(deliveredmatches[i])
 })
 
 
